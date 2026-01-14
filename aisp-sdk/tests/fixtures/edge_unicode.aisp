@@ -1,0 +1,52 @@
+𝔸5.1.test.unicode@2025-01-14
+γ≔test.unicode.edge
+ρ≔⟨unicode,i18n,symbols⟩
+
+;; Edge case: Document with extensive Unicode content
+;; Tests proper handling of various Unicode code points
+
+⟦Ω:Meta⟧{
+  domain≜test.unicode
+  version≜1.0.0
+  ∀D∈AISP:Ambig(D)<0.02
+
+  ;; Unicode test strings
+  emoji≜"🔧🧪✅❌⚠️"
+  cjk≜"中文日本語한국어"
+  arabic≜"العربية"
+  greek≜"αβγδεζηθικλμνξοπρστυφχψω"
+  cyrillic≜"АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+}
+
+⟦Σ:Types⟧{
+  ;; Types with Unicode names
+  数值≜ℕ
+  文字列≜𝕊
+  真偽≜𝔹
+
+  ;; Standard types
+  UnicodeString≜⟨value:𝕊,length:ℕ,encoding:𝕊⟩
+  Result≜ok|エラー|오류|错误
+}
+
+⟦Γ:Rules⟧{
+  ;; Unicode-aware rules
+  ∀s∈UnicodeString:s.encoding∈{"utf-8","utf-16","utf-32"}
+  ∀s∈UnicodeString:s.length≡codepoint_count(s.value)
+
+  ;; Mixed script handling
+  ∀x∈文字列:valid_unicode(x)
+}
+
+⟦Λ:Funcs⟧{
+  ;; Functions with Unicode
+  長さ≜λs.|s|
+  連結≜λa.λb.a⊕b
+  normalize≜λs.NFC(s)
+
+  ;; Standard functions
+  codepoint_count≜λs.count_codepoints(s)
+  is_ascii≜λs.∀c∈s:ord(c)<128
+}
+
+⟦Ε⟧⟨δ≜0.62;φ≜100;τ≜◊⁺;⊢valid;∎⟩

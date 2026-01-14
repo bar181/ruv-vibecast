@@ -12,6 +12,9 @@ mod symbols;
 mod templates;
 mod blocks;
 
+#[cfg(test)]
+mod tests;
+
 pub use anti_drift::{get_anti_drift, get_anti_drift_compact, get_anti_drift_json_len};
 pub use rosetta::{rosetta_lookup, rosetta_explain, rosetta_suggest};
 pub use symbols::{get_symbol, get_symbols_by_category, SYMBOL_COUNT};

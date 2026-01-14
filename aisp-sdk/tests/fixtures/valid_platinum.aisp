@@ -1,0 +1,65 @@
+𝔸5.1.test.platinum@2025-01-14
+γ≔test.platinum.tier
+ρ≔⟨high-density,◊⁺⁺⟩
+
+⟦Ω:Meta⟧{
+  domain≜test.platinum
+  version≜1.0.0
+  ∀D∈AISP:Ambig(D)<0.02
+  tier_target≜◊⁺⁺
+  δ_target≥0.75
+}
+
+⟦Σ:Types⟧{
+  α≜ℕ
+  β≜𝕊
+  γ≜𝔹
+  δ≜ℝ
+  T⟨α⟩≜⟨x:α,y:α⟩
+  R≜⟨a:α,b:β,c:γ⟩
+  F≜α→β
+  G≜∀α.α→α
+  H≜∃α.α×α
+  L≜𝒫(α)
+  M≜α⊎β
+  N≜α×β
+  O≜α→β→γ
+}
+
+⟦Γ:Rules⟧{
+  ∀x∈α:x≥0
+  ∀x∈β:x.length>0
+  ∀x,y∈α:x≤y⇒f(x)≤f(y)
+  ∃x∈α:x≡0
+  ∀R∈R:R.a>0⇒R.c≡⊤
+  ∀T∈T:T.x≤T.y
+  P(x)∧Q(x)⇒R(x)
+  ¬P(x)∨Q(x)
+  P(x)⊕Q(x)
+  P(x)⇔Q(x)
+}
+
+⟦Λ:Funcs⟧{
+  id≜λx.x
+  const≜λx.λy.x
+  flip≜λf.λx.λy.f(y)(x)
+  compose≜λf.λg.λx.f(g(x))
+  apply≜λf.λx.f(x)
+  curry≜λf.λx.λy.f(⟨x,y⟩)
+  uncurry≜λf.λp.f(p.fst)(p.snd)
+  fst≜λp.p.x
+  snd≜λp.p.y
+  map≜λf.λxs.xs.map(f)
+  filter≜λp.λxs.xs.filter(p)
+  fold≜λf.λz.λxs.xs.reduce(f,z)
+}
+
+⟦Π:Proofs⟧{
+  ∀x:id(x)≡x⊢by:β-reduction
+  ∀f,g,x:compose(f)(g)(x)≡f(g(x))⊢by:definition
+  ∀f,x,y:flip(f)(x)(y)≡f(y)(x)⊢by:definition
+  ∀x,y:fst(⟨x,y⟩)≡x⊢by:projection
+  ∀x,y:snd(⟨x,y⟩)≡y⊢by:projection
+}
+
+⟦Ε⟧⟨δ≜0.78;φ≜100;τ≜◊⁺⁺;⊢valid;∎⟩

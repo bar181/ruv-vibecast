@@ -1,0 +1,253 @@
+𝔸5.1.testing-strategy@2025-01-14
+γ≔aisp.sdk.testing
+ρ≔⟨unit,integration,e2e,validation,fixtures⟩
+
+;; ═══════════════════════════════════════════════════════════════════
+;; AISP SDK Testing Strategy Specification
+;; Comprehensive test coverage for validator, reference, embeddings
+;; ═══════════════════════════════════════════════════════════════════
+
+⟦Ω:Meta⟧{
+  domain≜aisp.sdk.testing
+  version≜0.1.0
+  ∀D∈AISP:Ambig(D)<0.02
+
+  ;; Testing Philosophy
+  philosophy≜⟨
+    deterministic,
+    isolated,
+    comprehensive,
+    fast
+  ⟩
+
+  ;; Coverage Targets
+  coverage.unit≥90%
+  coverage.integration≥85%
+  coverage.e2e≥80%
+}
+
+⟦Σ:Types⟧{
+  ;; Test Categories
+  TestCategory≜unit|integration|e2e|fixture|benchmark
+
+  ;; Test Result
+  TestResult≜⟨
+    name:𝕊,
+    passed:𝔹,
+    duration_ms:ℕ,
+    assertions:ℕ,
+    error:𝕊?
+  ⟩
+
+  ;; Test Suite
+  TestSuite≜⟨
+    name:𝕊,
+    category:TestCategory,
+    tests:𝒫(Test),
+    setup:Λ?,
+    teardown:Λ?
+  ⟩
+
+  ;; Test Definition
+  Test≜⟨
+    name:𝕊,
+    description:𝕊,
+    input:Any,
+    expected:Any,
+    assertion:Assertion
+  ⟩
+
+  ;; Assertion Types
+  Assertion≜equals|contains|matches|throws|truthy|falsy|gt|lt|gte|lte
+
+  ;; Fixture Types
+  Fixture≜⟨
+    name:𝕊,
+    category:FixtureCategory,
+    content:𝕊,
+    expected_tier:Tier?,
+    expected_valid:𝔹
+  ⟩
+  FixtureCategory≜valid_minimal|valid_full|invalid_header|invalid_blocks|edge_case
+
+  ;; Coverage Report
+  CoverageReport≜⟨
+    total_tests:ℕ,
+    passed:ℕ,
+    failed:ℕ,
+    skipped:ℕ,
+    coverage_pct:ℝ,
+    duration_ms:ℕ
+  ⟩
+}
+
+⟦Γ:Rules⟧{
+  ;; Test Isolation
+  ∀T∈tests:isolated(T)⇔¬depends_on_external(T)
+
+  ;; Determinism
+  ∀T∈tests:∀run₁,run₂:result(T,run₁)≡result(T,run₂)
+
+  ;; Coverage Requirements
+  validator.coverage≥90%
+  reference.coverage≥85%
+  embeddings.coverage≥80%
+
+  ;; Fixture Requirements
+  |fixtures.valid|≥5
+  |fixtures.invalid|≥5
+  |fixtures.edge_cases|≥3
+
+  ;; Performance Requirements
+  ∀T∈unit_tests:duration(T)≤100ms
+  ∀T∈integration_tests:duration(T)≤1000ms
+  ∀T∈e2e_tests:duration(T)≤5000ms
+
+  ;; Naming Convention
+  ∀T∈tests:name(T)≡"test_" ⊕ feature ⊕ "_" ⊕ scenario
+}
+
+⟦Λ:Funcs⟧{
+  ;; Test Runner
+  run_suite≜λS.⟨
+    results≔S.tests.map(run_test),
+    passed≔count(results,λr.r.passed),
+    failed≔count(results,λr.¬r.passed),
+    duration≔sum(results,λr.r.duration_ms)
+  ⟩
+
+  ;; Single Test Execution
+  run_test≜λT.try {
+    setup(T);
+    actual≔execute(T.input);
+    assert(T.assertion,actual,T.expected);
+    ⟨name≔T.name,passed≔⊤,duration_ms≔elapsed()⟩
+  } catch e {
+    ⟨name≔T.name,passed≔⊥,error≔e.message⟩
+  }
+
+  ;; Assertions
+  assert_equals≜λ(a,b).a≡b∨throw("Expected " ⊕ b ⊕ " but got " ⊕ a)
+  assert_contains≜λ(haystack,needle).needle∈haystack∨throw("Not found: " ⊕ needle)
+  assert_matches≜λ(s,pattern).regex_match(s,pattern)∨throw("No match")
+  assert_throws≜λ(fn,error_type).try{fn();throw("Expected error")}catch{⊤}
+  assert_truthy≜λv.v≡⊤∨throw("Expected truthy")
+  assert_falsy≜λv.v≡⊥∨throw("Expected falsy")
+
+  ;; Fixture Loading
+  load_fixture≜λname.read_file("fixtures/" ⊕ name ⊕ ".aisp")
+  load_all_fixtures≜λcategory.glob("fixtures/" ⊕ category ⊕ "/*.aisp").map(load_fixture)
+}
+
+⟦Θ:Tasks⟧{
+  ;; Test Suites to Implement
+  suite_validator_unit≜⟨
+    name≔"Validator Unit Tests",
+    tests≔⟨
+      test_validate_valid_document,
+      test_validate_missing_header,
+      test_validate_missing_blocks,
+      test_tier_calculation,
+      test_density_calculation,
+      test_ambiguity_check,
+      test_parse_blocks,
+      test_parse_header
+    ⟩
+  ⟩
+
+  suite_reference_unit≜⟨
+    name≔"Reference Unit Tests",
+    tests≔⟨
+      test_anti_drift_full,
+      test_anti_drift_compact,
+      test_rosetta_lookup_symbol,
+      test_rosetta_lookup_prose,
+      test_rosetta_explain,
+      test_rosetta_suggest,
+      test_template_list,
+      test_template_get,
+      test_symbols_list,
+      test_blocks_required,
+      test_ascii_aliases
+    ⟩
+  ⟩
+
+  suite_integration≜⟨
+    name≔"Integration Tests",
+    tests≔⟨
+      test_validate_then_reference,
+      test_reference_templates_valid,
+      test_cli_validate_command,
+      test_cli_reference_command
+    ⟩
+  ⟩
+
+  suite_e2e≜⟨
+    name≔"End-to-End Tests",
+    tests≔⟨
+      test_full_workflow_prose_to_valid,
+      test_npx_validator_cli,
+      test_npx_reference_cli
+    ⟩
+  ⟩
+
+  ;; Fixtures to Create
+  fixtures≜⟨
+    valid_minimal.aisp,
+    valid_full.aisp,
+    valid_platinum.aisp,
+    invalid_no_header.aisp,
+    invalid_missing_omega.aisp,
+    invalid_missing_evidence.aisp,
+    invalid_low_density.aisp,
+    edge_empty.aisp,
+    edge_unicode.aisp,
+    edge_large.aisp
+  ⟩
+}
+
+⟦Χ:Errors⟧{
+  assertion_failed⇒⟨code≔E001,msg≔"Assertion failed: {details}"⟩
+  fixture_not_found⇒⟨code≔E002,msg≔"Fixture not found: {name}"⟩
+  timeout⇒⟨code≔E003,msg≔"Test exceeded timeout: {duration}ms"⟩
+  setup_failed⇒⟨code≔E004,msg≔"Test setup failed: {reason}"⟩
+}
+
+⟦Δ:Contracts⟧{
+  ;; Test Contract
+  test_contract≜⟨
+    pre≔fixture_exists(input)∨input_valid(input),
+    post≔result.passed∈{⊤,⊥},
+    inv≔deterministic(test)∧isolated(test)
+  ⟩
+
+  ;; Suite Contract
+  suite_contract≜⟨
+    pre≔|tests|>0,
+    post≔|results|≡|tests|,
+    inv≔∀T∈tests:isolated(T)
+  ⟩
+
+  ;; CI Contract
+  ci_contract≜⟨
+    pre≔dependencies_installed,
+    post≔exit_code∈{0,1},
+    inv≔reproducible_on_any_machine
+  ⟩
+}
+
+⟦Π:Proofs⟧{
+  ;; Determinism Proof
+  ∀T∈tests:∀i,j∈ℕ:run(T,i).passed≡run(T,j).passed
+    ⊢by:no_external_state∧no_random∧no_time_dependency
+
+  ;; Coverage Completeness
+  ∀F∈public_functions:∃T∈tests:covers(T,F)
+    ⊢by:systematic_enumeration∧fixture_coverage
+
+  ;; Isolation Proof
+  ∀T₁,T₂∈tests:T₁≠T₂⇒¬affects(T₁,T₂)
+    ⊢by:no_shared_state∧fresh_fixtures
+}
+
+⟦Ε⟧⟨δ≜0.76;φ≜100;τ≜◊⁺⁺;⊢valid;∎⟩
