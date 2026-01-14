@@ -1,0 +1,35 @@
+{
+  "name": "@aisp/reference",
+  "version": "0.1.0",
+  "description": "AISP 5.1 reference system - anti-drift, Rosetta Stone, templates",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "aisp-reference": "./bin/cli.js"
+  },
+  "files": [
+    "dist/",
+    "bin/",
+    "data/"
+  ],
+  "scripts": {
+    "build:wasm": "./scripts/build.sh",
+    "build:js": "tsc",
+    "build": "npm run build:wasm && npm run build:js",
+    "test": "node test/test.js"
+  },
+  "keywords": [
+    "aisp",
+    "reference",
+    "rosetta",
+    "anti-drift",
+    "ai-protocol"
+  ],
+  "author": "vibecast",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruvnet/vibecast"
+  }
+}

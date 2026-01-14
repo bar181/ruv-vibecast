@@ -1,0 +1,165 @@
+𝔸5.1.reference-spec@2025-01-14
+γ≔aisp.sdk.reference
+ρ≔⟨anti-drift,rosetta,templates,symbols,blocks⟩
+
+;; ═══════════════════════════════════════════════════════════════════
+;; @aisp/reference Package Specification
+;; Anti-drift reference, Rosetta Stone, templates, symbol glossary
+;; ═══════════════════════════════════════════════════════════════════
+
+⟦Ω:Meta⟧{
+  package≜@aisp/reference
+  version≜0.1.0
+  size≜~200KB
+  ∀D∈AISP:Ambig(D)<0.02
+
+  ;; Core Purpose
+  purpose≜provide.aisp.reference.data
+  capabilities≜⟨anti_drift,rosetta,templates,symbols,blocks,ascii⟩
+
+  ;; Implementation
+  impl≜rust.wasm.js_fallback
+  no_std≜⊤
+}
+
+⟦Σ:Types⟧{
+  ;; Anti-Drift Document
+  AntiDriftDoc≜⟨full:𝕊,compact:𝕊,json:JSON⟩
+  AntiDriftFormat≜full|compact|json
+
+  ;; Rosetta Stone Entry
+  RosettaEntry≜⟨
+    id:ℕ,
+    symbol:𝕊,
+    prose:𝒫(𝕊),
+    category:Category,
+    usage:𝕊
+  ⟩
+
+  ;; Categories
+  Category≜quantifier|logic|definition|type|operator|block|special
+
+  ;; Symbol Entry
+  SymbolEntry≜⟨
+    symbol:𝕊,
+    name:𝕊,
+    ascii:𝕊,
+    category:Category,
+    usage:𝕊
+  ⟩
+
+  ;; Template
+  Template≜⟨name:𝕊,pattern:𝕊,variables:𝒫(𝕊)⟩
+  TemplateName≜Ω:meta|Σ:type|Σ:record|Γ:rule|Γ:implication|Λ:func|Ε:evidence|Θ:task|Δ:contract|minimal
+
+  ;; Block Definition
+  BlockDef≜⟨
+    symbol:𝕊,
+    name:𝕊,
+    purpose:𝕊,
+    required:𝔹
+  ⟩
+
+  ;; Lookup Result
+  LookupResult≜⟨
+    symbol:𝕊,
+    prose:𝒫(𝕊),
+    category:Category,
+    usage:𝕊,
+    confidence:ℝ
+  ⟩
+
+  ;; Suggestion
+  Suggestion≜⟨pattern:𝕊,confidence:ℝ⟩
+}
+
+⟦Γ:Rules⟧{
+  ;; Rosetta Bidirectionality
+  ∀R∈Rosetta:lookup(R.prose)≡R.symbol
+  ∀R∈Rosetta:explain(R.symbol)≡R.prose
+
+  ;; Anti-Drift Size Constraints
+  |anti_drift.compact|≤2KB
+  |anti_drift.full|≤8KB
+
+  ;; Symbol Coverage
+  |symbols|≥64
+  ∀S∈symbols:has_ascii_alias(S)
+
+  ;; Template Validity
+  ∀T∈templates:valid_aisp_pattern(T.pattern)
+
+  ;; Block Requirements
+  required_blocks≜{Ω,Σ,Γ,Λ,Ε}
+  optional_blocks≜{Θ,Χ,Δ,Φ,Π,ℭ}
+
+  ;; Lookup Confidence
+  ∀query:confidence(lookup(query))∈[0,1]
+  exact_match(query)⇒confidence≥0.95
+}
+
+⟦Λ:Funcs⟧{
+  ;; Anti-Drift Functions
+  anti_drift≜λformat.match format {
+    full⇒ANTI_DRIFT_FULL,
+    compact⇒ANTI_DRIFT_COMPACT,
+    json⇒parse_to_json(ANTI_DRIFT_FULL)
+  }
+
+  ;; Rosetta Stone Functions
+  rosetta_lookup≜λquery.find(ROSETTA,λR.query∈R.prose)
+  rosetta_explain≜λsymbol.find(ROSETTA,λR.R.symbol≡symbol)
+  rosetta_suggest≜λprose.rank(ROSETTA,λR.relevance(prose,R))
+
+  ;; Template Functions
+  template_list≜λ().TEMPLATES.map(λT.T.name)
+  template_get≜λname.find(TEMPLATES,λT.T.name≡name)
+  template_render≜λ(name,vars).substitute(template_get(name),vars)
+
+  ;; Symbol Functions
+  symbols_list≜λcategory.filter(SYMBOLS,λS.category≡∅∨S.category≡category)
+  symbols_ascii≜λ().SYMBOLS.map(λS.⟨S.ascii,S.symbol⟩)
+
+  ;; Block Functions
+  blocks_list≜λ().BLOCKS
+  blocks_required≜λ().filter(BLOCKS,λB.B.required)
+  blocks_optional≜λ().filter(BLOCKS,λB.¬B.required)
+}
+
+⟦Θ:Tasks⟧{
+  ;; CLI Commands
+  cmd_anti_drift≜⟨name≔anti-drift,flags≔⟨--compact,--json⟩,output≔𝕊⟩
+  cmd_rosetta_lookup≜⟨name≔rosetta.lookup,args≔⟨query⟩,output≔LookupResult⟩
+  cmd_rosetta_explain≜⟨name≔rosetta.explain,args≔⟨symbol⟩,output≔LookupResult⟩
+  cmd_rosetta_suggest≜⟨name≔rosetta.suggest,args≔⟨prose⟩,output≔𝒫(Suggestion)⟩
+  cmd_template_list≜⟨name≔template.list,output≔𝒫(𝕊)⟩
+  cmd_template_get≜⟨name≔template.get,args≔⟨name⟩,output≔Template⟩
+  cmd_symbols≜⟨name≔symbols,flags≔⟨--category⟩,output≔𝒫(SymbolEntry)⟩
+  cmd_blocks≜⟨name≔blocks,output≔𝒫(BlockDef)⟩
+  cmd_ascii≜⟨name≔ascii,output≔𝒫(⟨𝕊,𝕊⟩)⟩
+}
+
+⟦Χ:Errors⟧{
+  symbol_not_found⇒⟨code≔E001,msg≔"Symbol not found in Rosetta"⟩
+  template_not_found⇒⟨code≔E002,msg≔"Template not found: {name}"⟩
+  invalid_category⇒⟨code≔E003,msg≔"Invalid category: {category}"⟩
+  wasm_not_loaded⇒⟨code≔E004,msg≔"WASM module not loaded, using JS fallback"⟩
+}
+
+⟦Δ:Contracts⟧{
+  ;; Rosetta Contract
+  rosetta_contract≜⟨
+    pre≔query.length>0,
+    post≔result.confidence∈[0,1],
+    inv≔deterministic(lookup)∧deterministic(explain)
+  ⟩
+
+  ;; Anti-Drift Contract
+  anti_drift_contract≜⟨
+    pre≔format∈{full,compact,json},
+    post≔|result|>0,
+    inv≔|compact|≤2KB
+  ⟩
+}
+
+⟦Ε⟧⟨δ≜0.76;φ≜100;τ≜◊⁺⁺;⊢valid;∎⟩
