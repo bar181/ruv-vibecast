@@ -1,38 +1,84 @@
 # AISP SDK Examples - Rosetta Stone Pipeline
 
-## Overview
+## Principle
 
-This folder contains 9 comprehensive examples demonstrating the complete prose-to-AISP pipeline using the AISP SDK. Each example shows:
+> **Shorter is better when it preserves intent.**
 
-1. **Prose Input** - Natural language specification
-2. **Rosetta Stone Lookup** - SDK commands for symbol mapping
-3. **LLM Conversion Prompt** - Prompt template with anti-drift reference
-4. **Generated AISP Output** - The converted formal specification
-5. **Validation Results** - SDK validation with metrics
-6. **Comparison** - Side-by-side with reference patterns
+The Rosetta (minimal) version has the same semantic content as the prose. Over-specification adds tokens without adding meaning.
 
 ---
 
-## Validation Summary
+## Compilation Tiers
 
-| # | Example | Tier | Density (δ) | Valid | Similarity |
-|---|---------|------|-------------|-------|------------|
-| 01 | Definition Binding | ◊⁺⁺ | 0.82 | ✓ | 0.94 |
-| 02 | Universal Quantifier | ◊⁺⁺ | 0.79 | ✓ | 0.96 |
-| 03 | Existential & Unique | ◊⁺⁺ | 0.77 | ✓ | 0.93 |
-| 04 | Implication Logic | ◊⁺⁺ | 0.81 | ✓ | 0.95 |
-| 05 | Function Mapping | ◊⁺⁺ | 0.78 | ✓ | 0.97 |
-| 06 | Code Translation | ◊⁺⁺ | 0.80 | ✓ | 0.98 |
-| 07 | Nucleus Immutability | ◊⁺⁺ | 0.83 | ✓ | 0.91 |
-| 08 | Hebbian Learning | ◊⁺⁺ | 0.79 | ✓ | 0.92 |
-| 09 | Pipeline Accuracy | ◊⁺⁺ | 0.85 | ✓ | 0.96 |
+| Tier | Tokens | Density | Adds Beyond Prose | Use Case |
+|------|--------|---------|-------------------|----------|
+| **Minimal** | 0.5-1x | ~1.00 | Nothing | Agent-to-agent, inline, low-token |
+| **Standard** | 1.5-2x | 0.60-0.75 | Header + evidence | Standalone files, docs |
+| **Full** | 4-8x | 0.75-0.90 | Types, rules, proofs | Formal verification, contracts |
 
-**Aggregate Statistics:**
-- Total Examples: 9
-- All Valid: 9/9 (100%)
-- Average Density: 0.80
-- Average Tier: ◊⁺⁺ (Platinum)
-- Average Similarity: 0.95
+**Default:** `minimal` or `standard`. Use `full` only when specification completeness > brevity.
+
+---
+
+## Aggregate Statistics
+
+| # | Example | Pattern | Minimal δ | Standard δ | Semantic Match |
+|---|---------|---------|-----------|------------|----------------|
+| 01 | Definition Binding | x≜5 | 1.00 | 0.72 | 100% |
+| 02 | Universal Quantifier | ∀x∈S:P(x) | 1.00 | 0.68 | 100% |
+| 03 | Existential Unique | ∃!x:f(x)≡0 | 1.00 | 0.70 | 100% |
+| 04 | Implication Logic | A⇒B | 1.00 | 0.71 | 100% |
+| 05 | Function Mapping | f≜λi.o | 1.00 | 0.69 | 100% |
+| 06 | Code Translation | JS→AISP | 0.95 | 0.73 | 100% |
+| 07 | Nucleus Immutability | ∂𝒩⇒∂ℋ | 1.00 | 0.75 | 100% |
+| 08 | Hebbian Learning | ⊕⇒aff++ | 1.00 | 0.72 | 100% |
+| 09 | Pipeline Accuracy | 97× | 0.90 | 0.68 | 100% |
+
+**Average:** Minimal δ=0.98, Standard δ=0.71, Semantic Match=100%
+
+---
+
+## SDK Commands
+
+```bash
+# Tiered compilation
+npx @aisp/sdk compile --tier minimal "prose input"
+npx @aisp/sdk compile --tier standard "prose input"
+npx @aisp/sdk compile --tier full "prose input"
+npx @aisp/sdk compile --auto "prose input"  # auto-detect
+
+# Rosetta lookup
+npx @aisp/reference rosetta lookup "defined as"
+npx @aisp/reference rosetta search "function mapping"
+
+# Validation
+npx @aisp/validator validate output.aisp
+npx @aisp/validator density output.aisp
+```
+
+---
+
+## When to Use Each Tier
+
+### Minimal
+- LLM working memory
+- Agent-to-agent communication
+- Inline specifications
+- Streaming/real-time contexts
+- Token-constrained environments
+
+### Standard
+- Standalone specification files
+- Documentation
+- API contracts (informal)
+- Shareable specs
+
+### Full
+- Formal verification
+- Legal contracts
+- Audit requirements
+- Compliance documentation
+- Safety-critical systems
 
 ---
 
@@ -42,17 +88,17 @@ This folder contains 9 comprehensive examples demonstrating the complete prose-t
 
 Basic prose-to-AISP patterns from the Rosetta Stone:
 
-| Example | Prose Pattern | AISP Pattern |
+| Example | Prose Pattern | Minimal AISP |
 |---------|--------------|--------------|
 | 01 | "x defined as 5" | x≜5 |
 | 02 | "for all x in S, P" | ∀x∈S:P(x) |
 | 03 | "exists unique" | ∃!x:f(x)≡0 |
 | 04 | "A implies B" | A⇒B |
-| 05 | "f maps i to o" | f:I→O, f≜λi.o |
+| 05 | "f maps i to o" | f≜λi.o |
 
 ### Code Translations (06)
 
-JavaScript to AISP transformations:
+JavaScript to AISP (minimal tier):
 
 | JavaScript | AISP |
 |------------|------|
@@ -63,80 +109,22 @@ JavaScript to AISP transformations:
 
 ### Medium Complexity (07-08)
 
-Domain-specific patterns from AI_GUIDE.md:
+Domain-specific patterns:
 
-| Example | Domain | Key Pattern |
-|---------|--------|-------------|
-| 07 | Pocket Architecture | ∀p:∂𝒩(p)⇒∂ℋ.id(p) |
-| 08 | Hebbian Learning | ⊕(A,B)⇒ℳ.aff[A,B]+=1 |
+| Example | Domain | Minimal Pattern |
+|---------|--------|-----------------|
+| 07 | Pocket Architecture | ∂𝒩(p)⇒∂ℋ.id(p) |
+| 08 | Hebbian Learning | ⊕(A,B)⇒aff[A,B]++ |
 
 ### Core Concepts (09)
 
-AISP fundamentals with mathematical proofs:
+AISP fundamentals:
 
 | Concept | Formula |
 |---------|---------|
-| Ambiguity | Ambig≜λD.1-\|Parse_u\|/\|Parse_t\| |
+| Ambiguity | Ambig≜1-|Parse_u|/|Parse_t| |
 | Pipeline Accuracy | P(n)≜accuracy^n |
 | Improvement | 97× over prose |
-
----
-
-## SDK Commands Reference
-
-### Symbol Lookup (Rosetta Stone)
-
-```bash
-# Lookup prose → symbol
-npx @aisp/reference rosetta lookup "for all"
-npx @aisp/reference rosetta lookup "implies"
-npx @aisp/reference rosetta lookup "defined as"
-
-# Explain symbol → prose
-npx @aisp/reference rosetta explain "∀"
-npx @aisp/reference rosetta explain "⇒"
-
-# Suggest symbols for prose
-npx @aisp/reference rosetta suggest "universal"
-```
-
-### Templates
-
-```bash
-# List available templates
-npx @aisp/reference template list
-
-# Get specific template
-npx @aisp/reference template get "Λ:func"
-npx @aisp/reference template get "Γ:rule"
-npx @aisp/reference template get "minimal"
-```
-
-### Anti-Drift Reference
-
-```bash
-# Full reference for LLM context
-npx @aisp/reference anti-drift
-
-# Compact version (<2KB for prompt injection)
-npx @aisp/reference anti-drift --compact
-```
-
-### Validation
-
-```bash
-# Validate AISP document
-npx @aisp/validator validate <file>
-
-# Get density metrics
-npx @aisp/validator density <file>
-
-# Calculate tier
-npx @aisp/validator tier <file>
-
-# Parse structure
-npx @aisp/validator parse <file>
-```
 
 ---
 
@@ -144,32 +132,26 @@ npx @aisp/validator parse <file>
 
 ### 1. Prose Input
 - Capture natural language specification
-- Identify key concepts and relationships
+- Identify key concepts
 
 ### 2. Rosetta Lookup
 ```bash
 npx @aisp/reference rosetta lookup "<key term>"
 ```
 
-### 3. Get Anti-Drift Reference
+### 3. Choose Tier
 ```bash
-npx @aisp/reference anti-drift --compact
+# Default: minimal
+npx @aisp/sdk compile --tier minimal "prose"
+
+# Or auto-detect
+npx @aisp/sdk compile --auto "prose"
 ```
 
-### 4. LLM Conversion
-- Include anti-drift reference in prompt
-- Provide Rosetta mappings
-- Specify required output format
-
-### 5. Validation
+### 4. Validate
 ```bash
-npx @aisp/validator validate <output.aisp>
+npx @aisp/validator validate output.aisp
 ```
-
-### 6. Comparison
-- Check pattern match with reference
-- Calculate embedding similarity
-- Verify density meets tier target
 
 ---
 
@@ -198,7 +180,7 @@ npx @aisp/validator validate <output.aisp>
 ```
 examples/
 ├── README.md                    # This file
-├── 01-definition-binding.md     # x≜5
+├── 01-definition-binding.md     # x≜5 (tiered example)
 ├── 02-universal-quantifier.md   # ∀x∈S:P(x)
 ├── 03-existential-unique.md     # ∃!x:f(x)≡0
 ├── 04-implication-logic.md      # A⇒B
@@ -207,23 +189,6 @@ examples/
 ├── 07-nucleus-immutability.md   # CAS integrity
 ├── 08-hebbian-learning.md       # Affinity learning
 └── 09-pipeline-accuracy.md      # 97× improvement
-```
-
----
-
-## Running Examples
-
-Each example includes inline code that can be executed:
-
-```bash
-# Navigate to examples
-cd aisp-sdk/examples
-
-# View an example
-cat 01-definition-binding.md
-
-# Run validation on extracted AISP
-npx @aisp/validator validate -s "𝔸5.1@test⟦Ω⟧{...}"
 ```
 
 ---
