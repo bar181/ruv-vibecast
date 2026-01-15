@@ -1,0 +1,37 @@
+{
+  "name": "@aisp/convert",
+  "version": "0.1.0",
+  "description": "AISP 5.1 prose-to-AISP converter with tiered compilation",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "aisp-convert": "./bin/cli.js"
+  },
+  "files": [
+    "dist/",
+    "bin/",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "./scripts/build.sh",
+    "test": "node test/test.js"
+  },
+  "keywords": [
+    "aisp",
+    "converter",
+    "prose-to-aisp",
+    "tiered-compilation"
+  ],
+  "author": "Bradley Ross",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aisp/aisp-sdk-private"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "@aisp/validator": ">=0.1.0",
+    "@aisp/reference": ">=0.1.0"
+  }
+}

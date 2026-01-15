@@ -1,0 +1,99 @@
+𝔸5.1.test.full@2025-01-14
+γ≔test.full
+ρ≔⟨validation,comprehensive,all-blocks⟩
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Full AISP Document with All Block Types
+;; Test fixture for comprehensive validation
+;; ═══════════════════════════════════════════════════════════════════
+
+⟦Ω:Meta⟧{
+  domain≜test.comprehensive
+  version≜1.0.0
+  ∀D∈AISP:Ambig(D)<0.02
+
+  ;; Metadata
+  author≜"test-suite"
+  created≜2025-01-14
+  purpose≜validation_testing
+}
+
+⟦Σ:Types⟧{
+  ;; Basic Types
+  Status≜active|inactive|pending
+  Priority≜high|medium|low
+
+  ;; Complex Types
+  Task≜⟨
+    id:ℕ,
+    name:𝕊,
+    status:Status,
+    priority:Priority,
+    assignee:𝕊?
+  ⟩
+
+  ;; Collection Types
+  TaskList≜𝒫(Task)
+
+  ;; Result Type
+  Result⟨T⟩≜ok(T)|error(𝕊)
+}
+
+⟦Γ:Rules⟧{
+  ;; Task Validation Rules
+  ∀t∈Task:t.id>0
+  ∀t∈Task:t.name.length>0
+  ∀t∈Task:t.name.length≤256
+
+  ;; Business Rules
+  high_priority(t)⇔t.priority≡high∧t.status≡active
+  ∀t∈TaskList:count(t,high_priority)≤10
+
+  ;; Invariants
+  ∀t∈Task:t.status≡inactive⇒t.assignee≡∅
+}
+
+⟦Λ:Funcs⟧{
+  ;; Task Operations
+  create_task≜λ(name,priority).⟨id≔next_id(),name≔name,status≔pending,priority≔priority⟩
+  activate≜λt.⟨...t,status≔active⟩
+  complete≜λt.⟨...t,status≔inactive,assignee≔∅⟩
+
+  ;; Query Operations
+  filter_by_status≜λ(tasks,status).filter(tasks,λt.t.status≡status)
+  filter_by_priority≜λ(tasks,priority).filter(tasks,λt.t.priority≡priority)
+
+  ;; Aggregations
+  count_active≜λtasks.|filter_by_status(tasks,active)|
+  count_high_priority≜λtasks.|filter_by_priority(tasks,high)|
+}
+
+⟦Θ:Tasks⟧{
+  ;; Test Tasks
+  task_validate_all≜⟨name≔"Validate all fixtures",status≔pending⟩
+  task_run_tests≜⟨name≔"Run test suite",status≔pending⟩
+}
+
+⟦Χ:Errors⟧{
+  invalid_task_id⇒⟨code≔E001,msg≔"Task ID must be positive"⟩
+  empty_name⇒⟨code≔E002,msg≔"Task name cannot be empty"⟩
+  too_many_high_priority⇒⟨code≔E003,msg≔"Too many high priority tasks"⟩
+}
+
+⟦Δ:Contracts⟧{
+  ;; Create Task Contract
+  create_contract≜⟨
+    pre≔name.length>0∧name.length≤256,
+    post≔result.id>0∧result.status≡pending,
+    inv≔deterministic(create_task)
+  ⟩
+
+  ;; Activate Contract
+  activate_contract≜⟨
+    pre≔t.status≢active,
+    post≔result.status≡active,
+    inv≔t.id≡result.id
+  ⟩
+}
+
+⟦Ε⟧⟨δ≜0.72;φ≜100;τ≜◊⁺;⊢valid;∎⟩

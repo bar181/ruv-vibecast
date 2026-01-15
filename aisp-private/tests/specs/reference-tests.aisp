@@ -1,0 +1,294 @@
+𝔸5.1.reference-tests@2025-01-14
+γ≔aisp.sdk.tests.reference
+ρ≔⟨anti-drift,rosetta,templates,symbols,blocks,cli⟩
+
+;; ═══════════════════════════════════════════════════════════════════
+;; @aisp/reference Test Specification
+;; Unit and integration tests for AISP reference data package
+;; ═══════════════════════════════════════════════════════════════════
+
+⟦Ω:Meta⟧{
+  package≜@aisp/reference
+  test_count≜28
+  coverage_target≥85%
+  ∀D∈AISP:Ambig(D)<0.02
+}
+
+⟦Σ:Types⟧{
+  ;; Test Case
+  ReferenceTestCase≜⟨
+    id:𝕊,
+    name:𝕊,
+    function:𝕊,
+    input:Any,
+    expected:Any
+  ⟩
+}
+
+⟦Γ:Rules⟧{
+  ;; Determinism
+  ∀T∈tests:deterministic(T)
+
+  ;; Coverage
+  coverage(anti_drift)≥90%
+  coverage(rosetta)≥90%
+  coverage(templates)≥85%
+  coverage(symbols)≥85%
+  coverage(blocks)≥90%
+}
+
+⟦Λ:Tests⟧{
+  ;; ═══════════════════════════════════════════════════════════════
+  ;; ANTI-DRIFT TESTS
+  ;; ═══════════════════════════════════════════════════════════════
+
+  test_anti_drift_full_exists≜⟨
+    id≔"AD001",
+    name≔"Anti-drift full document exists",
+    function≔"antiDrift",
+    input≔⟨mode≔"full"⟩,
+    expected≔⟨not_empty≔⊤,contains≔"AISP 5.1"⟩
+  ⟩
+
+  test_anti_drift_full_content≜⟨
+    id≔"AD002",
+    name≔"Anti-drift full contains all sections",
+    function≔"antiDrift",
+    input≔⟨mode≔"full"⟩,
+    expected≔⟨contains_all≔["Σ_512","Tiers","Blocks","Bindings"]⟩
+  ⟩
+
+  test_anti_drift_compact_exists≜⟨
+    id≔"AD003",
+    name≔"Anti-drift compact document exists",
+    function≔"antiDrift",
+    input≔⟨mode≔"compact"⟩,
+    expected≔⟨not_empty≔⊤,max_length≔2048⟩
+  ⟩
+
+  test_anti_drift_compact_size≜⟨
+    id≔"AD004",
+    name≔"Anti-drift compact under 2KB",
+    function≔"antiDrift",
+    input≔⟨mode≔"compact"⟩,
+    expected≔⟨length_lte≔2048⟩
+  ⟩
+
+  ;; ═══════════════════════════════════════════════════════════════
+  ;; ROSETTA STONE TESTS
+  ;; ═══════════════════════════════════════════════════════════════
+
+  test_rosetta_lookup_forall≜⟨
+    id≔"R001",
+    name≔"Lookup 'for all' returns ∀",
+    function≔"rosettaLookup",
+    input≔"for all",
+    expected≔⟨symbol≔"∀",category≔"quantifier"⟩
+  ⟩
+
+  test_rosetta_lookup_exists≜⟨
+    id≔"R002",
+    name≔"Lookup 'exists' returns ∃",
+    function≔"rosettaLookup",
+    input≔"exists",
+    expected≔⟨symbol≔"∃",category≔"quantifier"⟩
+  ⟩
+
+  test_rosetta_lookup_implies≜⟨
+    id≔"R003",
+    name≔"Lookup 'implies' returns ⇒",
+    function≔"rosettaLookup",
+    input≔"implies",
+    expected≔⟨symbol≔"⇒",category≔"logic"⟩
+  ⟩
+
+  test_rosetta_lookup_defined_as≜⟨
+    id≔"R004",
+    name≔"Lookup 'defined as' returns ≜",
+    function≔"rosettaLookup",
+    input≔"defined as",
+    expected≔⟨symbol≔"≜",category≔"definition"⟩
+  ⟩
+
+  test_rosetta_lookup_not_found≜⟨
+    id≔"R005",
+    name≔"Lookup unknown term returns null",
+    function≔"rosettaLookup",
+    input≔"xyzzy_not_a_term",
+    expected≔⟨result≔null⟩
+  ⟩
+
+  test_rosetta_explain_forall≜⟨
+    id≔"R006",
+    name≔"Explain ∀ symbol",
+    function≔"rosettaExplain",
+    input≔"∀",
+    expected≔⟨prose_contains≔"for all",category≔"quantifier"⟩
+  ⟩
+
+  test_rosetta_explain_lambda≜⟨
+    id≔"R007",
+    name≔"Explain λ symbol",
+    function≔"rosettaExplain",
+    input≔"λ",
+    expected≔⟨prose_contains≔"lambda",category≔"type"⟩
+  ⟩
+
+  test_rosetta_suggest_universal≜⟨
+    id≔"R008",
+    name≔"Suggest symbols for 'universal'",
+    function≔"rosettaSuggest",
+    input≔"universal",
+    expected≔⟨suggestions_include≔"∀"⟩
+  ⟩
+
+  test_rosetta_suggest_function≜⟨
+    id≔"R009",
+    name≔"Suggest symbols for 'function'",
+    function≔"rosettaSuggest",
+    input≔"function",
+    expected≔⟨suggestions_include≔["λ","Λ"]⟩
+  ⟩
+
+  ;; ═══════════════════════════════════════════════════════════════
+  ;; TEMPLATE TESTS
+  ;; ═══════════════════════════════════════════════════════════════
+
+  test_template_list_not_empty≜⟨
+    id≔"TL001",
+    name≔"Template list is not empty",
+    function≔"templateList",
+    input≔⟨⟩,
+    expected≔⟨length_gte≔8⟩
+  ⟩
+
+  test_template_list_contains_required≜⟨
+    id≔"TL002",
+    name≔"Template list contains required templates",
+    function≔"templateList",
+    input≔⟨⟩,
+    expected≔⟨contains_all≔["Ω:meta","Σ:type","Γ:rule","Λ:func","Ε:evidence"]⟩
+  ⟩
+
+  test_template_get_omega≜⟨
+    id≔"TG001",
+    name≔"Get Ω:meta template",
+    function≔"templateGet",
+    input≔"Ω:meta",
+    expected≔⟨not_null≔⊤,contains≔"⟦Ω:Meta⟧"⟩
+  ⟩
+
+  test_template_get_sigma≜⟨
+    id≔"TG002",
+    name≔"Get Σ:type template",
+    function≔"templateGet",
+    input≔"Σ:type",
+    expected≔⟨not_null≔⊤,contains≔"⟦Σ"⟩
+  ⟩
+
+  test_template_get_minimal≜⟨
+    id≔"TG003",
+    name≔"Get minimal template",
+    function≔"templateGet",
+    input≔"minimal",
+    expected≔⟨not_null≔⊤,contains_all≔["⟦Ω","⟦Σ","⟦Γ","⟦Λ","⟦Ε"]⟩
+  ⟩
+
+  test_template_get_not_found≜⟨
+    id≔"TG004",
+    name≔"Get unknown template returns null",
+    function≔"templateGet",
+    input≔"unknown_template",
+    expected≔⟨result≔null⟩
+  ⟩
+
+  ;; ═══════════════════════════════════════════════════════════════
+  ;; SYMBOL TESTS
+  ;; ═══════════════════════════════════════════════════════════════
+
+  test_symbols_list_count≜⟨
+    id≔"S001",
+    name≔"Symbols list has 64+ entries",
+    function≔"symbolsList",
+    input≔⟨⟩,
+    expected≔⟨length_gte≔64⟩
+  ⟩
+
+  test_symbols_has_ascii≜⟨
+    id≔"S002",
+    name≔"All symbols have ASCII aliases",
+    function≔"symbolsList",
+    input≔⟨⟩,
+    expected≔⟨all_have_property≔"ascii"⟩
+  ⟩
+
+  test_symbols_ascii_mapping≜⟨
+    id≔"S003",
+    name≔"ASCII aliases return correct table",
+    function≔"symbolsAscii",
+    input≔⟨⟩,
+    expected≔⟨contains≔[["forall","∀"],["exists","∃"],["lambda","λ"]]⟩
+  ⟩
+
+  ;; ═══════════════════════════════════════════════════════════════
+  ;; BLOCK TESTS
+  ;; ═══════════════════════════════════════════════════════════════
+
+  test_blocks_list_all≜⟨
+    id≔"B001",
+    name≔"Blocks list returns all blocks",
+    function≔"blocksList",
+    input≔⟨⟩,
+    expected≔⟨length_gte≔10⟩
+  ⟩
+
+  test_blocks_required_five≜⟨
+    id≔"B002",
+    name≔"Five required blocks",
+    function≔"blocksRequired",
+    input≔⟨⟩,
+    expected≔⟨length≔5,symbols≔["Ω","Σ","Γ","Λ","Ε"]⟩
+  ⟩
+
+  test_blocks_optional_exists≜⟨
+    id≔"B003",
+    name≔"Optional blocks exist",
+    function≔"blocksOptional",
+    input≔⟨⟩,
+    expected≔⟨length_gte≔5,symbols_include≔["Θ","Χ","Δ"]⟩
+  ⟩
+
+  ;; ═══════════════════════════════════════════════════════════════
+  ;; CLI TESTS
+  ;; ═══════════════════════════════════════════════════════════════
+
+  test_cli_anti_drift_default≜⟨
+    id≔"C001",
+    name≔"CLI anti-drift default output",
+    input≔⟨command≔"anti-drift"⟩,
+    expected≔⟨exit_code≔0,output_contains≔"AISP"⟩
+  ⟩
+
+  test_cli_anti_drift_compact≜⟨
+    id≔"C002",
+    name≔"CLI anti-drift compact flag",
+    input≔⟨command≔"anti-drift",args≔["--compact"]⟩,
+    expected≔⟨exit_code≔0,output_length_lte≔2048⟩
+  ⟩
+
+  test_cli_rosetta_lookup≜⟨
+    id≔"C003",
+    name≔"CLI rosetta lookup command",
+    input≔⟨command≔"rosetta",args≔["lookup","for all"]⟩,
+    expected≔⟨exit_code≔0,output_contains≔"∀"⟩
+  ⟩
+
+  test_cli_template_list≜⟨
+    id≔"C004",
+    name≔"CLI template list command",
+    input≔⟨command≔"template",args≔["list"]⟩,
+    expected≔⟨exit_code≔0,output_contains≔"Ω:meta"⟩
+  ⟩
+}
+
+⟦Ε⟧⟨δ≜0.75;φ≜100;τ≜◊⁺⁺;⊢valid;∎⟩

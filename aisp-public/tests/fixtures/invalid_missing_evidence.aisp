@@ -1,0 +1,26 @@
+𝔸5.1.test.missing-evidence@2025-01-14
+γ≔test.invalid.missing-evidence
+ρ≔⟨validation⟩
+
+;; This document is INVALID - missing required Ε (Evidence) block
+;; Should be rejected by validator with error E002
+
+⟦Ω:Meta⟧{
+  domain≜test.invalid
+  version≜1.0.0
+  ∀D∈AISP:Ambig(D)<0.02
+}
+
+⟦Σ:Types⟧{
+  Type≜⟨value:ℕ⟩
+}
+
+⟦Γ:Rules⟧{
+  ∀x∈Type:x.value≥0
+}
+
+⟦Λ:Funcs⟧{
+  id≜λx.x
+}
+
+;; Missing ⟦Ε⟧ block - document is incomplete

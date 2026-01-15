@@ -1,0 +1,61 @@
+# @aisp/convert License
+
+Copyright (c) 2026 Bradley Ross. All rights reserved.
+
+## Fair Use License
+
+### Free Use Permitted
+
+This software is FREE to use for:
+
+1. **Individuals** - Personal projects, learning, experimentation
+2. **Academic institutions** - Research, education, coursework
+3. **Non-profit organizations** - Mission-driven work
+4. **Organizations under $1B annual revenue** - Business use
+5. **Any organization** - Up to 100 conversions per month
+
+### Commercial License Required
+
+A commercial license is required if ALL of the following apply:
+
+1. Your organization has **annual revenue ≥ $1,000,000,000 USD** (one billion)
+2. Your usage exceeds **100 conversions per month**
+
+### Commercial Licensing
+
+For commercial licensing inquiries:
+- Website: https://aisp.dev/enterprise
+- Email: enterprise@aisp.dev
+- Pricing: Starting at $299/month
+
+### Restrictions
+
+You may NOT:
+- Remove or modify this license notice
+- Claim this software as your own work
+- Use this software to create a competing commercial service
+- Redistribute this software for commercial gain without a license
+
+### Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+### Summary
+
+| User Type | Revenue | Monthly Usage | License Required |
+|-----------|---------|---------------|------------------|
+| Individual | Any | Any | No (MIT-like) |
+| Academic | Any | Any | No |
+| Non-profit | Any | Any | No |
+| Startup | <$1B | Any | No |
+| Enterprise | <$1B | Any | No |
+| Enterprise | ≥$1B | <100/mo | No |
+| Enterprise | ≥$1B | ≥100/mo | **Yes** |
+
+99.9% of users will never need a commercial license.

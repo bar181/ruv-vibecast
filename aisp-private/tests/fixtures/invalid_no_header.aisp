@@ -1,0 +1,21 @@
+;; This document is INVALID - missing AISP header
+;; Should be rejected by validator with error E001
+
+⟦Ω:Meta⟧{
+  domain≜test.invalid
+  version≜1.0.0
+}
+
+⟦Σ:Types⟧{
+  Type≜⟨value:ℕ⟩
+}
+
+⟦Γ:Rules⟧{
+  ∀x∈Type:x.value≥0
+}
+
+⟦Λ:Funcs⟧{
+  id≜λx.x
+}
+
+⟦Ε⟧⟨δ≜0.50;τ≜◊;⊢invalid;∎⟩

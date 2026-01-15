@@ -1,0 +1,37 @@
+# AISP SDK Private Repository License
+
+Copyright (c) 2026 Bradley Ross
+
+This repository contains packages with different licenses:
+
+## MIT Licensed Packages (Always Free)
+
+The following packages are licensed under the MIT License:
+
+- `@aisp/validator` - See packages/validator/LICENSE
+- `@aisp/reference` - See packages/reference/LICENSE
+
+## Fair Use Licensed Packages
+
+The following packages are licensed under the Fair Use License:
+
+- `@aisp/convert` - See packages/convert/LICENSE
+- `@aisp/embeddings` - See packages/embeddings/LICENSE (when available)
+
+### Fair Use Summary
+
+Free for:
+- Individuals, academics, non-profits
+- Organizations under $1B annual revenue
+- Any organization: up to 100 conversions/month
+
+Commercial license required only if:
+- Revenue ≥ $1B/year AND
+- Usage ≥ 100 conversions/month
+
+See individual package LICENSE files for full terms.
+
+## Contact
+
+- Commercial licensing: enterprise@aisp.dev
+- Website: https://aisp.dev

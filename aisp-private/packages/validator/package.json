@@ -1,0 +1,32 @@
+{
+  "name": "@aisp/validator",
+  "version": "0.1.0",
+  "description": "AISP 5.1 document validator - parse, validate, tier, density",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "aisp-validator": "./bin/cli.js"
+  },
+  "files": [
+    "dist/",
+    "bin/",
+    "wasm/"
+  ],
+  "scripts": {
+    "build": "./scripts/build.sh",
+    "test": "node test/test.js"
+  },
+  "keywords": [
+    "aisp",
+    "validator",
+    "wasm",
+    "type-checking"
+  ],
+  "author": "vibecast",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruvnet/vibecast"
+  }
+}

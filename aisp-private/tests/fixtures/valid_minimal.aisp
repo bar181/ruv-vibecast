@@ -1,0 +1,23 @@
+𝔸5.1.test.minimal@2025-01-14
+γ≔test.minimal
+ρ≔⟨validation⟩
+
+⟦Ω:Meta⟧{
+  domain≜test
+  version≜1.0.0
+  ∀D∈AISP:Ambig(D)<0.02
+}
+
+⟦Σ:Types⟧{
+  TestType≜⟨name:𝕊,value:ℕ⟩
+}
+
+⟦Γ:Rules⟧{
+  ∀x∈TestType:x.value≥0
+}
+
+⟦Λ:Funcs⟧{
+  identity≜λx.x
+}
+
+⟦Ε⟧⟨δ≜0.68;φ≜100;τ≜◊⁺;⊢valid;∎⟩

@@ -1,0 +1,154 @@
+𝔸5.1.validator-spec@2025-01-14
+γ≔aisp.sdk.validator
+ρ≔⟨validation,parsing,tier,density⟩
+
+;; ═══════════════════════════════════════════════════════════════════
+;; @aisp/validator Package Specification
+;; AISP 5.1 document validation, parsing, tier calculation, density
+;; ═══════════════════════════════════════════════════════════════════
+
+⟦Ω:Meta⟧{
+  package≜@aisp/validator
+  version≜0.1.0
+  size≜~50KB
+  ∀D∈AISP:Ambig(D)<0.02
+
+  ;; Core Purpose
+  purpose≜validate.aisp.documents
+  capabilities≜⟨validate,parse,tier,density⟩
+}
+
+⟦Σ:Types⟧{
+  ;; Validation Result
+  ValidationResult≜⟨
+    valid:𝔹,
+    tier:Tier,
+    tierName:𝕊,
+    tierValue:ℕ,
+    delta:ℝ,
+    ambiguity:ℝ,
+    errors:𝒫(Error)
+  ⟩
+
+  ;; Quality Tiers
+  Tier≜◊⁺⁺|◊⁺|◊|◊⁻|⊘
+  TierThreshold≜⟨symbol:Tier,name:𝕊,threshold:ℝ,value:ℕ⟩
+
+  ;; Parse Result
+  ParseResult≜⟨
+    valid:𝔹,
+    hasHeader:𝔹,
+    blocks:𝒫(Block),
+    errors:𝒫(Error)
+  ⟩
+
+  ;; Block Structure
+  Block≜⟨type:BlockType,name:𝕊?,offset:ℕ⟩
+  BlockType≜Ω|Σ|Γ|Λ|Ε|Θ|Χ|Δ|Φ|Π|ℭ
+
+  ;; Density Metrics
+  DensityResult≜⟨
+    delta:ℝ,
+    aispCount:ℕ,
+    totalCount:ℕ,
+    wsCount:ℕ
+  ⟩
+
+  ;; Error Types
+  Error≜⟨code:𝕊,message:𝕊⟩
+  ErrorCode≜MISSING_HEADER|MISSING_BLOCK|LOW_DENSITY|HIGH_AMBIGUITY
+}
+
+⟦Γ:Rules⟧{
+  ;; Tier Thresholds
+  tier(δ)≡◊⁺⁺⇔δ≥0.75
+  tier(δ)≡◊⁺⇔δ≥0.60∧δ<0.75
+  tier(δ)≡◊⇔δ≥0.40∧δ<0.60
+  tier(δ)≡◊⁻⇔δ≥0.20∧δ<0.40
+  tier(δ)≡⊘⇔δ<0.20
+
+  ;; Validity Rules
+  valid(D)⇔hasHeader(D)∧hasRequiredBlocks(D)∧ambiguity(D)<0.02
+
+  ;; Required Blocks
+  required_blocks≜{Ω,Σ,Γ,Λ,Ε}
+  hasRequiredBlocks(D)⇔∀B∈required_blocks:B∈blocks(D)
+
+  ;; Header Rule
+  hasHeader(D)⇔starts_with(D,"𝔸")
+
+  ;; Density Calculation
+  δ(D)≜|aisp_symbols(D)|/|non_whitespace(D)|
+
+  ;; Ambiguity Calculation (simplified)
+  ambiguity(D)≜missing_blocks(D)>0?0.5:0.01
+}
+
+⟦Λ:Funcs⟧{
+  ;; Main Validation
+  validate≜λD.⟨
+    valid≔hasHeader(D)∧hasRequiredBlocks(D)∧ambiguity(D)<0.02,
+    tier≔tier(δ(D)),
+    delta≔δ(D),
+    ambiguity≔ambiguity(D),
+    errors≔collect_errors(D)
+  ⟩
+
+  ;; Parse Only
+  parse≜λD.⟨
+    valid≔hasHeader(D)∧hasRequiredBlocks(D),
+    hasHeader≔starts_with(D,"𝔸"),
+    blocks≔extract_blocks(D),
+    errors≔collect_parse_errors(D)
+  ⟩
+
+  ;; Tier Calculation
+  getTier≜λD.tier(δ(D))
+
+  ;; Density Calculation
+  getDensity≜λD.⟨
+    delta≔δ(D),
+    aispCount≔|aisp_symbols(D)|,
+    totalCount≔|chars(D)|,
+    wsCount≔|whitespace(D)|
+  ⟩
+
+  ;; Helper Functions
+  extract_blocks≜λD.regex_match(D,/⟦([ΩΣΓΛΕΘΧΔΦΠℭ]):?([^\]]*)?⟧/g)
+  collect_errors≜λD.filter(checks(D),λc.¬c.passed)
+  aisp_symbols≜λD.filter(chars(D),λc.c∈AISP_SYMBOL_SET)
+}
+
+⟦Θ:Tasks⟧{
+  ;; CLI Commands
+  cmd_validate≜⟨name≔validate,args≔⟨file|string⟩,output≔ValidationResult⟩
+  cmd_parse≜⟨name≔parse,args≔⟨file|string⟩,output≔ParseResult⟩
+  cmd_tier≜⟨name≔tier,args≔⟨file|string⟩,output≔Tier⟩
+  cmd_density≜⟨name≔density,args≔⟨file|string⟩,output≔DensityResult⟩
+}
+
+⟦Χ:Errors⟧{
+  MISSING_HEADER⇒⟨code≔E001,msg≔"Missing AISP header (must start with 𝔸)"⟩
+  MISSING_BLOCK⇒⟨code≔E002,msg≔"Missing required block: {block}"⟩
+  LOW_DENSITY⇒⟨code≔E003,msg≔"Density too low: δ < 0.20"⟩
+  HIGH_AMBIGUITY⇒⟨code≔E004,msg≔"Ambiguity too high: ≥ 0.02"⟩
+  FILE_NOT_FOUND⇒⟨code≔E005,msg≔"Input file not found"⟩
+}
+
+⟦Δ:Contracts⟧{
+  ;; Validation Contract
+  validate_contract≜⟨
+    pre≔input.length>0∧input.length≤1MB,
+    post≔result.valid∈{⊤,⊥}∧result.delta∈[0,1],
+    inv≔deterministic(validate)
+  ⟩
+
+  ;; CLI Contract
+  cli_contract≜⟨
+    pre≔args.length≥2,
+    post≔exit_code∈{0,1,2},
+    inv≔stdout_is_utf8
+  ⟩
+}
+
+⟦Ε⟧⟨δ≜0.74;φ≜100;τ≜◊⁺;⊢valid;∎⟩

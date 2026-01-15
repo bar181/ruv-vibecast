@@ -1,0 +1,30 @@
+[package]
+name = "aisp-reference"
+version = "0.1.0"
+edition = "2021"
+authors = ["vibecast"]
+description = "AISP 5.1 reference system - anti-drift, Rosetta Stone, templates"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ruvnet/vibecast"
+keywords = ["aisp", "wasm", "reference", "rosetta", "anti-drift"]
+categories = ["wasm", "no-std"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Minimal dependencies for size
+
+[features]
+default = []
+std = []
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.release.package."*"]
+opt-level = "z"

@@ -1,0 +1,186 @@
+𝔸5.1.embeddings-spec@2025-01-14
+γ≔aisp.sdk.embeddings
+ρ≔⟨embeddings,intent,matching,verification⟩
+
+;; ═══════════════════════════════════════════════════════════════════
+;; @aisp/embeddings Package Specification (PLANNED)
+;; Intent matching via embeddings for prose ↔ AISP verification
+;; ═══════════════════════════════════════════════════════════════════
+
+⟦Ω:Meta⟧{
+  package≜@aisp/embeddings
+  version≜0.1.0
+  size≜~1.5MB
+  status≜planned
+  ∀D∈AISP:Ambig(D)<0.02
+
+  ;; Core Purpose
+  purpose≜verify.intent.matching
+  capabilities≜⟨embed,compare,match,verify⟩
+
+  ;; Implementation Strategy
+  impl≜rust.wasm.onnx
+  model≜minilm_quantized
+}
+
+⟦Σ:Types⟧{
+  ;; Embedding Vector
+  Embedding≜⟨vector:ℝ³⁸⁴,norm:ℝ,source:𝕊⟩
+
+  ;; Match Result
+  MatchResult≜⟨
+    prose_embedding:Embedding,
+    aisp_embedding:Embedding,
+    similarity:ℝ,
+    match:𝔹,
+    confidence:ℝ
+  ⟩
+
+  ;; Verification Result
+  VerificationResult≜⟨
+    prose:𝕊,
+    aisp:𝕊,
+    intent_match:𝔹,
+    similarity_score:ℝ,
+    threshold:ℝ,
+    details:𝒫(MatchDetail)
+  ⟩
+
+  ;; Match Detail
+  MatchDetail≜⟨
+    prose_segment:𝕊,
+    aisp_block:𝕊,
+    score:ℝ
+  ⟩
+
+  ;; Model Configuration
+  ModelConfig≜⟨
+    name:𝕊,
+    dimensions:ℕ,
+    quantized:𝔹,
+    size_kb:ℕ
+  ⟩
+
+  ;; Batch Request
+  BatchRequest≜⟨texts:𝒫(𝕊),normalize:𝔹⟩
+  BatchResult≜⟨embeddings:𝒫(Embedding),elapsed_ms:ℕ⟩
+}
+
+⟦Γ:Rules⟧{
+  ;; Similarity Thresholds
+  intent_match(prose,aisp)⇔similarity(embed(prose),embed(aisp))≥0.70
+  high_confidence(result)⇔result.similarity≥0.85
+
+  ;; Vector Properties
+  ∀e∈Embedding:dim(e.vector)≡384
+  ∀e∈Embedding:e.norm∈[0,1]
+
+  ;; Cosine Similarity
+  similarity(e₁,e₂)≜dot(e₁.vector,e₂.vector)/(e₁.norm×e₂.norm)
+
+  ;; Model Constraints
+  model.dimensions≡384
+  model.size≤1.5MB
+
+  ;; Performance Requirements
+  embed_latency≤50ms
+  batch_throughput≥100/second
+}
+
+⟦Λ:Funcs⟧{
+  ;; Core Embedding
+  embed≜λtext.⟨
+    vector≔model.encode(text),
+    norm≔l2_norm(vector),
+    source≔text
+  ⟩
+
+  ;; Batch Embedding
+  embed_batch≜λtexts.texts.map(embed)
+
+  ;; Similarity Calculation
+  cosine_similarity≜λ(e₁,e₂).dot(e₁.vector,e₂.vector)/(e₁.norm×e₂.norm)
+
+  ;; Intent Matching
+  match_intent≜λ(prose,aisp).⟨
+    prose_embedding≔embed(prose),
+    aisp_embedding≔embed(aisp),
+    similarity≔cosine_similarity(prose_embedding,aisp_embedding),
+    match≔similarity≥0.70,
+    confidence≔similarity
+  ⟩
+
+  ;; Full Verification
+  verify≜λ(prose,aisp).⟨
+    prose≔prose,
+    aisp≔aisp,
+    intent_match≔match_intent(prose,aisp).match,
+    similarity_score≔match_intent(prose,aisp).similarity,
+    threshold≔0.70,
+    details≔match_blocks(prose,aisp)
+  ⟩
+
+  ;; Block-Level Matching
+  match_blocks≜λ(prose,aisp).
+    extract_blocks(aisp).map(λblock.⟨
+      prose_segment≔find_relevant(prose,block),
+      aisp_block≔block,
+      score≔cosine_similarity(embed(prose_segment),embed(block))
+    ⟩)
+
+  ;; Model Initialization
+  init≜λconfig.load_onnx_model(config.name,config.quantized)
+}
+
+⟦Θ:Tasks⟧{
+  ;; CLI Commands
+  cmd_embed≜⟨name≔embed,args≔⟨text⟩,output≔Embedding⟩
+  cmd_batch≜⟨name≔batch,args≔⟨file⟩,output≔BatchResult⟩
+  cmd_match≜⟨name≔match,args≔⟨prose,aisp⟩,output≔MatchResult⟩
+  cmd_verify≜⟨name≔verify,args≔⟨prose_file,aisp_file⟩,output≔VerificationResult⟩
+  cmd_init≜⟨name≔init,flags≔⟨--model,--quantized⟩,output≔status⟩
+}
+
+⟦Χ:Errors⟧{
+  model_not_loaded⇒⟨code≔E001,msg≔"Embedding model not initialized"⟩
+  text_too_long⇒⟨code≔E002,msg≔"Input text exceeds maximum length (512 tokens)"⟩
+  invalid_embedding⇒⟨code≔E003,msg≔"Invalid embedding vector"⟩
+  low_similarity⇒⟨code≔E004,msg≔"Intent match below threshold: {score} < 0.70"⟩
+  onnx_error⇒⟨code≔E005,msg≔"ONNX runtime error: {details}"⟩
+}
+
+⟦Δ:Contracts⟧{
+  ;; Embedding Contract
+  embed_contract≜⟨
+    pre≔text.length>0∧text.length≤512_tokens,
+    post≔result.vector.length≡384∧result.norm>0,
+    inv≔deterministic(embed)
+  ⟩
+
+  ;; Match Contract
+  match_contract≜⟨
+    pre≔prose.length>0∧aisp.length>0,
+    post≔result.similarity∈[0,1],
+    inv≔similarity(a,b)≡similarity(b,a)
+  ⟩
+
+  ;; Verification Contract
+  verify_contract≜⟨
+    pre≔valid_aisp(aisp),
+    post≔result.intent_match∈{⊤,⊥},
+    inv≔verify(p,a).match⇔similarity(p,a)≥threshold
+  ⟩
+}
+
+⟦Π:Proofs⟧{
+  ;; Symmetry of Similarity
+  ∀a,b:similarity(a,b)≡similarity(b,a)
+
+  ;; Triangle Inequality (approximate)
+  ∀a,b,c:similarity(a,c)≥similarity(a,b)+similarity(b,c)-1
+
+  ;; Normalization Preserves Direction
+  ∀v:direction(normalize(v))≡direction(v)
+}
+
+⟦Ε⟧⟨δ≜0.78;φ≜100;τ≜◊⁺⁺;⊢planned;status≔future⟩

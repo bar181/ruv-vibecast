@@ -1,0 +1,27 @@
+𝔸5.1.test.low-density@2025-01-14
+
+This is a document with very low AISP symbol density.
+Most of the content here is plain English prose without any
+formal AISP notation or symbols. The validator should flag
+this as having insufficient density to qualify as a valid
+AISP document.
+
+The purpose of this fixture is to test the density calculation
+and ensure documents with delta below 0.20 are rejected with
+the appropriate tier classification of ⊘ (rejected).
+
+Here is some more filler text to further reduce the density:
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+
+Now we add the minimal required blocks, but the density is still too low:
+
+⟦Ω⟧{m}
+⟦Σ⟧{t}
+⟦Γ⟧{r}
+⟦Λ⟧{f}
+⟦Ε⟧⟨δ≜0.10;τ≜⊘;⊢rejected⟩
+
+More prose text after the blocks to further dilute the density.
+This should result in a density well below the 0.20 threshold.

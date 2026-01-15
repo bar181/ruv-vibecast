@@ -1,0 +1,20 @@
+𝔸5.1.test.missing-omega@2025-01-14
+γ≔test.invalid.missing-omega
+ρ≔⟨validation⟩
+
+;; This document is INVALID - missing required Ω block
+;; Should be rejected by validator with error E002
+
+⟦Σ:Types⟧{
+  Type≜⟨value:ℕ⟩
+}
+
+⟦Γ:Rules⟧{
+  ∀x∈Type:x.value≥0
+}
+
+⟦Λ:Funcs⟧{
+  id≜λx.x
+}
+
+⟦Ε⟧⟨δ≜0.55;τ≜◊;⊢invalid;∎⟩

@@ -1,0 +1,229 @@
+𝔸5.1.validator-tests@2025-01-14
+γ≔aisp.sdk.tests.validator
+ρ≔⟨validate,parse,tier,density,cli⟩
+
+;; ═══════════════════════════════════════════════════════════════════
+;; @aisp/validator Test Specification
+;; Unit and integration tests for AISP document validation
+;; ═══════════════════════════════════════════════════════════════════
+
+⟦Ω:Meta⟧{
+  package≜@aisp/validator
+  test_count≜24
+  coverage_target≥90%
+  ∀D∈AISP:Ambig(D)<0.02
+}
+
+⟦Σ:Types⟧{
+  ;; Test Case
+  ValidatorTestCase≜⟨
+    id:𝕊,
+    name:𝕊,
+    input:𝕊,
+    expected:ExpectedResult
+  ⟩
+
+  ;; Expected Results
+  ExpectedResult≜⟨
+    valid:𝔹?,
+    tier:Tier?,
+    delta:ℝ?,
+    error_codes:𝒫(𝕊)?
+  ⟩
+}
+
+⟦Γ:Rules⟧{
+  ;; All tests must be deterministic
+  ∀T∈tests:deterministic(T)
+
+  ;; Coverage must include all public functions
+  coverage(validate)≥95%
+  coverage(parse)≥95%
+  coverage(getTier)≥90%
+  coverage(getDensity)≥90%
+}
+
+⟦Λ:Tests⟧{
+  ;; ═══════════════════════════════════════════════════════════════
+  ;; VALIDATION TESTS
+  ;; ═══════════════════════════════════════════════════════════════
+
+  test_validate_minimal_valid≜⟨
+    id≔"V001",
+    name≔"Validate minimal valid document",
+    input≔fixture("valid_minimal.aisp"),
+    expected≔⟨valid≔⊤,tier≔◊⁺⟩
+  ⟩
+
+  test_validate_full_valid≜⟨
+    id≔"V002",
+    name≔"Validate full valid document",
+    input≔fixture("valid_full.aisp"),
+    expected≔⟨valid≔⊤,tier≔◊⁺⁺⟩
+  ⟩
+
+  test_validate_missing_header≜⟨
+    id≔"V003",
+    name≔"Reject document without AISP header",
+    input≔fixture("invalid_no_header.aisp"),
+    expected≔⟨valid≔⊥,error_codes≔["E001"]⟩
+  ⟩
+
+  test_validate_missing_omega≜⟨
+    id≔"V004",
+    name≔"Reject document without Ω block",
+    input≔fixture("invalid_missing_omega.aisp"),
+    expected≔⟨valid≔⊥,error_codes≔["E002"]⟩
+  ⟩
+
+  test_validate_missing_evidence≜⟨
+    id≔"V005",
+    name≔"Reject document without Ε block",
+    input≔fixture("invalid_missing_evidence.aisp"),
+    expected≔⟨valid≔⊥,error_codes≔["E002"]⟩
+  ⟩
+
+  test_validate_low_density≜⟨
+    id≔"V006",
+    name≔"Flag document with low density",
+    input≔fixture("invalid_low_density.aisp"),
+    expected≔⟨valid≔⊥,tier≔⊘,error_codes≔["E003"]⟩
+  ⟩
+
+  ;; ═══════════════════════════════════════════════════════════════
+  ;; TIER CALCULATION TESTS
+  ;; ═══════════════════════════════════════════════════════════════
+
+  test_tier_platinum≜⟨
+    id≔"T001",
+    name≔"Calculate platinum tier (δ≥0.75)",
+    input≔fixture("valid_platinum.aisp"),
+    expected≔⟨tier≔◊⁺⁺,delta≔0.78⟩
+  ⟩
+
+  test_tier_gold≜⟨
+    id≔"T002",
+    name≔"Calculate gold tier (0.60≤δ<0.75)",
+    input≔"𝔸5.1@test\n⟦Ω⟧{∀x:P(x)}⟦Σ⟧{T≜ℕ}⟦Γ⟧{r}⟦Λ⟧{f≜λx.x}⟦Ε⟧⟨δ≜0.65⟩",
+    expected≔⟨tier≔◊⁺⟩
+  ⟩
+
+  test_tier_silver≜⟨
+    id≔"T003",
+    name≔"Calculate silver tier (0.40≤δ<0.60)",
+    input≔"𝔸5.1@test\n⟦Ω⟧{meta}⟦Σ⟧{types}⟦Γ⟧{rules}⟦Λ⟧{funcs}⟦Ε⟧⟨δ≜0.45⟩ plain text here",
+    expected≔⟨tier≔◊⟩
+  ⟩
+
+  test_tier_bronze≜⟨
+    id≔"T004",
+    name≔"Calculate bronze tier (0.20≤δ<0.40)",
+    input≔"𝔸5.1@test\nSome prose ⟦Ω⟧{m}⟦Σ⟧{t}⟦Γ⟧{r}⟦Λ⟧{f}⟦Ε⟧⟨⟩ more prose and text",
+    expected≔⟨tier≔◊⁻⟩
+  ⟩
+
+  test_tier_rejected≜⟨
+    id≔"T005",
+    name≔"Calculate rejected tier (δ<0.20)",
+    input≔fixture("invalid_low_density.aisp"),
+    expected≔⟨tier≔⊘⟩
+  ⟩
+
+  ;; ═══════════════════════════════════════════════════════════════
+  ;; DENSITY CALCULATION TESTS
+  ;; ═══════════════════════════════════════════════════════════════
+
+  test_density_high≜⟨
+    id≔"D001",
+    name≔"Calculate high density document",
+    input≔"∀∃⇒≜λ∈⟦⟧⟨⟩",
+    expected≔⟨delta≔1.0⟩
+  ⟩
+
+  test_density_mixed≜⟨
+    id≔"D002",
+    name≔"Calculate mixed content density",
+    input≔"∀x∈S:P(x)⇒Q(x)",
+    expected≔⟨delta≔0.35⟩
+  ⟩
+
+  test_density_low≜⟨
+    id≔"D003",
+    name≔"Calculate low density document",
+    input≔"This is mostly plain text with one ∀ symbol",
+    expected≔⟨delta≔0.02⟩
+  ⟩
+
+  test_density_empty≜⟨
+    id≔"D004",
+    name≔"Handle empty input",
+    input≔"",
+    expected≔⟨delta≔0.0⟩
+  ⟩
+
+  ;; ═══════════════════════════════════════════════════════════════
+  ;; PARSE TESTS
+  ;; ═══════════════════════════════════════════════════════════════
+
+  test_parse_header_standard≜⟨
+    id≔"P001",
+    name≔"Parse standard AISP header",
+    input≔"𝔸5.1.domain@2025-01-14",
+    expected≔⟨hasHeader≔⊤⟩
+  ⟩
+
+  test_parse_header_minimal≜⟨
+    id≔"P002",
+    name≔"Parse minimal header",
+    input≔"𝔸5.1@test",
+    expected≔⟨hasHeader≔⊤⟩
+  ⟩
+
+  test_parse_blocks_all≜⟨
+    id≔"P003",
+    name≔"Parse all block types",
+    input≔fixture("valid_full.aisp"),
+    expected≔⟨blocks≔[Ω,Σ,Γ,Λ,Ε,Θ,Χ,Δ]⟩
+  ⟩
+
+  test_parse_blocks_named≜⟨
+    id≔"P004",
+    name≔"Parse named blocks",
+    input≔"⟦Ω:Meta⟧{} ⟦Σ:Types⟧{} ⟦Γ:Rules⟧{}",
+    expected≔⟨blocks≔[⟨type≔Ω,name≔"Meta"⟩,⟨type≔Σ,name≔"Types"⟩,⟨type≔Γ,name≔"Rules"⟩]⟩
+  ⟩
+
+  ;; ═══════════════════════════════════════════════════════════════
+  ;; CLI TESTS
+  ;; ═══════════════════════════════════════════════════════════════
+
+  test_cli_validate_file≜⟨
+    id≔"C001",
+    name≔"CLI validate command with file",
+    input≔⟨command≔"validate",args≔["fixtures/valid_minimal.aisp"]⟩,
+    expected≔⟨exit_code≔0,output_contains≔"valid"⟩
+  ⟩
+
+  test_cli_validate_string≜⟨
+    id≔"C002",
+    name≔"CLI validate command with string",
+    input≔⟨command≔"validate",args≔["-s","𝔸5.1@t⟦Ω⟧{}⟦Σ⟧{}⟦Γ⟧{}⟦Λ⟧{}⟦Ε⟧⟨⟩"]⟩,
+    expected≔⟨exit_code≔0⟩
+  ⟩
+
+  test_cli_tier≜⟨
+    id≔"C003",
+    name≔"CLI tier command",
+    input≔⟨command≔"tier",args≔["fixtures/valid_platinum.aisp"]⟩,
+    expected≔⟨exit_code≔0,output_contains≔"◊⁺⁺"⟩
+  ⟩
+
+  test_cli_density≜⟨
+    id≔"C004",
+    name≔"CLI density command",
+    input≔⟨command≔"density",args≔["fixtures/valid_minimal.aisp"]⟩,
+    expected≔⟨exit_code≔0,output_contains≔"delta"⟩
+  ⟩
+}
+
+⟦Ε⟧⟨δ≜0.74;φ≜100;τ≜◊⁺;⊢valid;∎⟩
